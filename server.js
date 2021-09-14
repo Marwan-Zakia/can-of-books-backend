@@ -24,7 +24,7 @@ let booksModle;
 main().catch(err => console.log(err));
 
 async function main() {
-  await mongoose.connect(process.env.MONGO_URL);
+  await mongoose.connect('mongodb://marwan:marwan@book-shard-00-00.dqttt.mongodb.net:27017,book-shard-00-01.dqttt.mongodb.net:27017,book-shard-00-02.dqttt.mongodb.net:27017/book?ssl=true&replicaSet=atlas-l7w2xl-shard-0&authSource=admin&retryWrites=true&w=majority');
 
   const bookSchema = new mongoose.Schema({
     title: String,
