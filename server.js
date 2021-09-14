@@ -6,7 +6,7 @@ const cors = require('cors');
 
 const server = express();
 server.use(cors());
-
+server.use(express.json());
 const PORT = process.env.PORT || 3001;
 // home
 server.get('/', (request, response) => {
@@ -24,7 +24,7 @@ let booksModle;
 main().catch(err => console.log(err));
 
 async function main() {
-  await mongoose.connect('mongodb://localhost:27017/books');
+  await mongoose.connect(process.env.MONGO_URL);
 
   const bookSchema = new mongoose.Schema({
     title: String,
@@ -35,7 +35,7 @@ async function main() {
 
   booksModle = mongoose.model('Books', bookSchema);
 
-      // seedData();
+  //  seedData();
 }
 
 //seeding a data function 
@@ -46,8 +46,8 @@ async function seedData() {
 
     A s Napoleon’s army invades, Tolstoy brilliantly follows characters from diverse backgrounds—peasants and nobility, civilians and soldiers—as they struggle with the problems unique to their era, their history, and their culture. And as the novel progresses, these characters transcend their specificity, becoming some of the most moving—and human—figures in world literature.
     `,
-    status: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.amazon.com%2FWar-Peace-Signet-Classics-Tolstoy%2Fdp%2F0451532112&psig=AOvVaw2kSbQkThJjlxmUZEX4ZjT0&ust=1631619022144000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCJDL79Ts-_ICFQAAAAAdAAAAABAD',
-    authoremail: 'email1@gmail.com'
+    status: 'https://images-na.ssl-images-amazon.com/images/I/A1aDb5U5myL.jpg',
+    authoremail: 'marwanamir.ma@gmail.com'
   });
 
   const Book2 = new booksModle({
@@ -57,14 +57,14 @@ async function seedData() {
       The narrator recalls his childhood, aided by the famous madeleine; and describes M. Swann's
        passion for Odette. The work is incomparable. Edmund Wilson said "[Proust] has supplied for the first time in literature an equivalent in the full 
     scale for the new theory of modern physics."`,
-    status: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.goodreads.com%2Fbook%2Fshow%2F18796.In_Search_of_Lost_Time&psig=AOvVaw3SjEWFhW-Zq1Xn9OvWlOHl&ust=1631618960200000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCMiL6bbs-_ICFQAAAAAdAAAAABAD',
-    authoremail: 'email1@gmail.com'
+    status: 'https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1325095874l/13329904.jpg',
+    authoremail: 'marwanamir.ma@gmail.com'
   });
   const Book3 = new booksModle({
     title: 'Ulysses',
     description: `Ulysses chronicles the passage of Leopold Bloom through Dublin during an ordinary day, June 16, 1904. The title parallels and alludes to Odysseus (Latinised into Ulysses), the hero of Homer's Odyssey (e.g., the correspondences between Leopold Bloom and Odysseus, Molly Bloom and Penelope, and Stephen Dedalus and Telemachus). Joyce fans worldwide now celebrate June 16 as Bloomsday.`,
-    status: 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.amazon.in%2FUlysses-Masters-Collections-James-Joyce%2Fdp%2F9350330938&psig=AOvVaw35e11rMlciE-cNh6fj2n0r&ust=1631619219417000&source=images&cd=vfe&ved=0CAsQjRxqFwoTCKCz8bLt-_ICFQAAAAAdAAAAABAD',
-    authoremail: 'email3@gmail.com'
+    status: 'https://image.sesamy.com/store/1/0270/1207/1447/products/1133383_202104061350.jpg?v=1617765347&width=856&height=856',
+    authoremail: 'marwanamir.ma@gmail.com'
   });
 
   await Book1.save();
@@ -76,9 +76,53 @@ async function seedData() {
 //Routes
 
 server.get('/books', getbooksHandler);
-
+server.post('/addbook', addbookHandler);
+server.delete('/deletebook/:id', deletebookHandler);
 //Functions Handlers
 
+
+async function addbookHandler(req, res) {
+  const title = req.body.title;
+  const description = req.body.description;
+  const status = req.body.status;
+  const authoremail = req.body.authoremail;
+  // const { title, description, authoremail } = req.body;
+  await booksModle.create({
+    title: title,
+    description: description,
+    status: status,
+    authoremail: authoremail
+  });
+
+  booksModle.find({ authoremail: authoremail }, (err, result) => {
+    if (err) {
+      console.log(err);
+    }
+    else {
+      res.send(result);
+    }
+  })
+
+}
+
+function deletebookHandler(req, res) {
+  const bookId = req.params.id;
+  const authoremail = req.query.email;
+  booksModle.deleteOne({ _id: bookId }, (err, result) => {
+
+    booksModle.find({ authoremail: authoremail }, (err, result) => {
+      if (err) {
+        console.log(err);
+      }
+      else {
+        res.send(result);
+      }
+    })
+
+  })
+
+
+}
 
 function getbooksHandler(req, res) {
   //send book list (email)
@@ -91,7 +135,7 @@ function getbooksHandler(req, res) {
     else {
       res.send(result);
     }
-  
+
   })
 }
 
