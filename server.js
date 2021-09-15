@@ -78,6 +78,7 @@ async function seedData() {
 server.get('/books', getbooksHandler);
 server.post('/addbook', addbookHandler);
 server.delete('/deletebook/:id', deletebookHandler);
+server.put('/updatebook/:id',updatebookHandler);
 //Functions Handlers
 
 
@@ -138,5 +139,34 @@ function getbooksHandler(req, res) {
 
   })
 }
+
+
+
+
+function updatebookHandler(req,res) {
+  const id = req.params.id;
+  const title = req.body.title;
+  const description = req.body.description;
+  const status = req.body.status;
+  const authoremail = req.body.authoremail;
+  
+  
+  booksModle.findByIdAndUpdate(id,{title,description,status},(err,result)=>{
+    booksModle.find({authoremail:authoremail},(err,result)=>{
+          if(err)
+          {
+              console.log(err);
+          }
+          else
+          {
+              res.send(result);
+          }
+      })
+  })
+}
+
+
+
+
 
 server.listen(PORT, () => console.log(`listening on ${PORT}`));
